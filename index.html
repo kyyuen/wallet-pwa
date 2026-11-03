@@ -145,7 +145,7 @@ async function addExpense(){
   // try online first if backend set
   if(backend && navigator.onLine){
     try {
-      const r=await fetch(backend,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'add',entry})});
+      const r=await fetch(backend,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'add',entry}),credentials:'include'});
       const j=await r.json();
       if(j.ok){ setStatus('addStatus','Saved to sheet','ok'); resetForm(); updateBadge(); return; }
       throw new Error(j.error||'failed');
@@ -196,10 +196,10 @@ async function syncPending(){
   let synced=0; const ids=[];
   for(const p of pending){
     try {
-      const r=await fetch(backend,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'add',entry:p})});
+      const r=await fetch(backend,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'add',entry:p}),credentials:'include'});
       const j=await r.json();
       if(j.ok){ ids.push(p.id); synced++; }
-    } catch(e){ break; }
+    } catch(e){ setStatus('syncStatus','Error: '+e.message,'warn'); break; }
   }
   if(ids.length) await queueClear(ids);
   setStatus('syncStatus', synced+' synced, '+(pending.length-synced)+' remaining', synced===pending.length?'ok':'warn');
@@ -213,7 +213,7 @@ async function refreshRecent(){
   if(!backend){ setStatus('recentStatus','Set backend URL first','warn'); return; }
   setStatus('recentStatus','Loading...');
   try {
-    const r=await fetch(backend+'?action=recent&n=30', {cache:'no-store'});
+    const r=await fetch(backend+'?action=recent&n=30', {cache:'no-store',credentials:'include'});
     const j=await r.json();
     if(!j.ok) throw new Error(j.error);
     const el=document.getElementById('recent'); el.innerHTML='';
