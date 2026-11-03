@@ -199,6 +199,7 @@ async function syncPending(){
       const r=await fetch(backend,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'add',entry:p}),credentials:'include'});
       const j=await r.json();
       if(j.ok){ ids.push(p.id); synced++; }
+      else { setStatus('syncStatus','Backend: '+(j.error||'unknown'), 'warn'); }
     } catch(e){ setStatus('syncStatus','Error: '+e.message,'warn'); break; }
   }
   if(ids.length) await queueClear(ids);
